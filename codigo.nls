@@ -1,10 +1,146 @@
-breed [gooners gooner] 
+breed [coletores coletor] 
+breed [exploradores explorador]
+
+coletores-own [
+  energia
+  fov
+  estado
+]
+
+exploradores-own [
+  energia
+  fov
+  estado
+]
+
 to setup
   clear-all
-  create-gooners 100 [
-    set color white
-    set size 2
-    setxy random-xcor random-ycor
+
+  ask patches[
+    set pcolor green
   ]
-  reset-timer
+  
+  ask patches[
+     if random 101 <= 5
+       [set pcolor gray]
+  ]
+
+  ask patches with [distancexy 0 0 < 3] [
+    set pcolor yellow
+  ]
+
+  create-exploradores numero-exploradores [
+    set color blue
+    set shape "car"
+    set size 0.7
+    setxy -0.5 0
+    set fov 5
+    set energia 100
+    set estado "explorar"
+  ]
+
+   create-coletores numero-coletores [
+    set color orange
+    set shape "truck"
+    set size 1
+    setxy 0 0.5
+    set energia 100
+    set estado "explorar"
+    set fov 2
+  ]
+  reset-ticks
+end
+
+to go 
+ 
+  ask exploradores [
+   movimento-exploradores
+  ]
+
+  ask coletores [
+   movimento-coletores
+  ]
+  
+  tick
+end
+
+
+to movimento-coletores
+  let proximo-patch patch-ahead 1
+  let patch-esq patch-left-and-ahead 45 1
+  let patch-dir patch-right-and-ahead 45 1
+
+
+  let frente-bloqueada? (proximo-patch = nobody or [pcolor] of proximo-patch = gray)
+  let esq-bloqueada? (patch-esq = nobody or [pcolor] of patch-esq = gray)
+  let dir-bloqueada? (patch-dir = nobody or [pcolor] of patch-dir = gray)
+
+  let energia-necessaria-voltar (distancexy 0 0) + 10
+
+
+ if pcolor = yellow and estado = "voltar-base" [
+    set energia energia + 100
+    set estado "explorar"
+  ]
+
+  if estado = "explorar" and energia <= energia-necessaria-voltar [
+    set estado "voltar-base"
+  ]
+
+  
+
+
+  if estado = "explorar" [
+    
+    ifelse frente-bloqueada? and esq-bloqueada? and dir-bloqueada? [
+      right 180
+    ]
+    [
+
+      ifelse frente-bloqueada? [
+        right one-of [90 -90]
+      ]
+      [
+
+        if esq-bloqueada? [ right one-of [45 90] ]
+        if dir-bloqueada? [ left one-of [45 90] ]
+      ]
+    ]
+    
+    forward 1    
+    set energia (energia - 1)
+  ]
+
+  if estado = "voltar-base" [
+    facexy 0 0
+    
+    ifelse frente-bloqueada? and esq-bloqueada? and dir-bloqueada? [
+      right 180
+    ]
+    [
+      ifelse frente-bloqueada? [
+        right one-of [90 -90]
+      ]
+      [
+        if esq-bloqueada? [ right one-of [45 90] ]
+        if dir-bloqueada? [ left one-of [45 90] ]
+      ]
+    ]
+    
+    forward 1  
+    set energia (energia - 1)
+  ]
+
+   if energia <= 0 [
+      die
+     ]
+
+end
+
+
+
+
+to movimento-exploradores
+  right (random 31) - 15
+  forward 1
 end
