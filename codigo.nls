@@ -1,0 +1,10 @@
+breed [gooners gooner] 
+to setup
+  clear-all
+  create-gooners 100 [
+    set color white
+    set size 2
+    setxy random-xcor random-ycor
+  ]
+  reset-timer
+end
