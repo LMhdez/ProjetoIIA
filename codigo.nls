@@ -5,26 +5,32 @@ coletores-own [
   energia
   fov
   estado
+  dov
 ]
 
 exploradores-own [
   energia
   fov
   estado
+  dov
 ]
 
 to setup
   clear-all
 
-  ask patches[
+  ask patches [
     set pcolor green
   ]
-  
-  ask patches[
-     if random 101 <= 5
-       [set pcolor gray]
+  ask patches [
+    if random 101 <= 5 [
+      set pcolor gray
+    ]
   ]
 
+  ask n-of 5 patches with [pcolor = green and distancexy 0 0 > 3 and pcolor != gray] [
+      set pcolor brown
+  ]
+  
   ask patches with [distancexy 0 0 < 3] [
     set pcolor yellow
   ]
@@ -34,113 +40,135 @@ to setup
     set shape "car"
     set size 0.7
     setxy -0.5 0
-    set fov 5
-    set energia 100
+    set fov 180
+    set dov 3
+    set energia 150
     set estado "explorar"
   ]
 
-   create-coletores numero-coletores [
+  create-coletores numero-coletores [
     set color orange
     set shape "truck"
     set size 1
     setxy 0 0.5
     set energia 100
     set estado "explorar"
-    set fov 2
+    set fov 45
+    set dov 1
   ]
+  
   reset-ticks
 end
 
 to go 
- 
   ask exploradores [
-   movimento-exploradores
+    movimento-exploradores
   ]
 
   ask coletores [
-   movimento-coletores
+    movimento-coletores
   ]
   
   tick
 end
 
-
-to movimento-coletores
+to evitar-obstaculos
   let proximo-patch patch-ahead 1
   let patch-esq patch-left-and-ahead 45 1
   let patch-dir patch-right-and-ahead 45 1
-
 
   let frente-bloqueada? (proximo-patch = nobody or [pcolor] of proximo-patch = gray)
   let esq-bloqueada? (patch-esq = nobody or [pcolor] of patch-esq = gray)
   let dir-bloqueada? (patch-dir = nobody or [pcolor] of patch-dir = gray)
 
-  let energia-necessaria-voltar (distancexy 0 0) + 10
-
-
- if pcolor = yellow and estado = "voltar-base" [
-    set energia energia + 100
-    set estado "explorar"
+  ifelse frente-bloqueada? and esq-bloqueada? and dir-bloqueada? [
+    right 180
   ]
-
-  if estado = "explorar" and energia <= energia-necessaria-voltar [
-    set estado "voltar-base"
-  ]
-
-  
-
-
-  if estado = "explorar" [
-    
-    ifelse frente-bloqueada? and esq-bloqueada? and dir-bloqueada? [
-      right 180
+  [
+    ifelse frente-bloqueada? [
+      right one-of [90 -90]
     ]
     [
-
-      ifelse frente-bloqueada? [
-        right one-of [90 -90]
-      ]
-      [
-
-        if esq-bloqueada? [ right one-of [45 90] ]
-        if dir-bloqueada? [ left one-of [45 90] ]
-      ]
+      if esq-bloqueada? [ right one-of [45 90] ]
+      if dir-bloqueada? [ left one-of [45 90] ]
     ]
-    
-    forward 1    
-    set energia (energia - 1)
   ]
-
-  if estado = "voltar-base" [
-    facexy 0 0
-    
-    ifelse frente-bloqueada? and esq-bloqueada? and dir-bloqueada? [
-      right 180
-    ]
-    [
-      ifelse frente-bloqueada? [
-        right one-of [90 -90]
-      ]
-      [
-        if esq-bloqueada? [ right one-of [45 90] ]
-        if dir-bloqueada? [ left one-of [45 90] ]
-      ]
-    ]
-    
-    forward 1  
-    set energia (energia - 1)
-  ]
-
-   if energia <= 0 [
-      die
-     ]
-
 end
 
+to scan-recursos
+  let recursos-encontrados patches in-cone dov fov with [pcolor = brown]
+  if any? recursos-encontrados [
+    set estado "recurso-encontrado"
+    let recurso-mais-proximo min-one-of recursos-encontrados [distance myself]
+    facexy [pxcor] of recurso-mais-proximo [pycor] of recurso-mais-proximo
+  ]
+end
 
+to movimento-exploracao
+  evitar-obstaculos        
+  forward 1
+end
 
+to movimento-voltar-base
+  facexy 0 0
+  evitar-obstaculos
+  forward 1
+end
+
+to movimento-coletores
+  let energia-necessaria-voltar (distancexy 0 0) + 10
+  
+  if estado = "voltar-base"[
+    if pcolor = yellow[
+      set energia energia + 100
+      set estado "explorar"
+    ]
+    movimento-voltar-base
+  ]
+  
+  if estado = "explorar"  [
+    if energia <= energia-necessaria-voltar [
+      set estado "voltar-base"
+    ]
+    movimento-exploracao
+  ] 
+
+  set energia (energia - 1)
+  if energia <= 0 [
+    die
+  ]
+  end
 
 to movimento-exploradores
-  right (random 31) - 15
-  forward 1
+  let energia-necessaria-voltar (distancexy 0 0) + 10
+
+  scan-recursos
+
+  if estado = "recurso-encontrado" and estado != "voltar-base" [
+    if pcolor = brown [
+      set pcolor red
+      set estado "explorar"
+    ]
+   movimento-exploracao
+  ]
+
+  if estado = "voltar-base"[
+    if pcolor = yellow[
+      set energia energia + 100
+      set estado "explorar"
+    ]
+    movimento-voltar-base
+  ]
+
+  if estado = "explorar"  [
+    if energia <= energia-necessaria-voltar [
+      set estado "voltar-base"
+    ]
+    movimento-exploracao
+  ]
+
+  set energia (energia - 1)
+  if energia <= 0 [
+    die
+  ]
 end
