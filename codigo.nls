@@ -22,6 +22,11 @@ exploradores-own [
   dov
 ]
 
+patches-own [
+  cor-base
+  recurso
+]
+
 to setup
   clear-all
 
@@ -29,6 +34,7 @@ to setup
 
   ask patches [
     set pcolor green
+    set recurso 0
   ]
   ask patches [
     if random 101 <= 5 [
@@ -37,8 +43,12 @@ to setup
   ]
 
   ask n-of 5 patches with [pcolor = green and distancexy 0 0 > 3 and pcolor != gray] [
-      set pcolor brown
-      
+
+    let chaves-cores table:keys mapa-cores
+    let cor-aleatoria one-of chaves-cores
+    set pcolor brown
+    set cor-base cor-aleatoria
+    set recurso table:get mapa-cores cor-aleatoria
   ]
   
   ask patches with [distancexy 0 0 < 3] [
@@ -52,10 +62,9 @@ to setup
     setxy -0.5 0
     set fov 180
     set dov 3
-    set energia 300
-    set velocidade 1
+    set energia energia-exploradores
+    set velocidade precision (0.6 + random-float 0.4) 3
     set estado "explorar"
-
   ]
 
   create-coletores numero-coletores [
@@ -63,11 +72,11 @@ to setup
     set shape "truck"
     set size 1
     setxy 0 0.5
-    set energia 200
+    set energia energia-coletores
     set estado "explorar"
     set fov 45
     set dov 1
-    set velocidade 0.5
+    set velocidade precision (0.2 + random-float 0.2) 3
     set carga 0
   ]
   
@@ -84,8 +93,12 @@ to go
   ]
   ask turtles [ 
     ifelse mostrar-energia [
-      set label round energia  
-      set label-color black    
+      set label (word "E:" round energia " V:" velocidade) 
+      
+      ;; Branco (white) ou amarelo (yellow) têm o melhor contraste no teu mapa
+      set label-color white
+
+
     ] [
       set label ""             
     ]
@@ -144,8 +157,8 @@ to movimento-coletores
   
   if estado = "voltar-base"[
 
-    if pcolor = yellow[
-      set energia energia + 200
+    if pcolor = yellow and energia < energia-coletores [
+      set energia energia-coletores
       set estado "explorar"
       set carga 0
       stop
@@ -160,20 +173,28 @@ to movimento-coletores
       stop
     ]
 
-    let chaves-cores table:keys mapa-cores
-  let patches-alvo patches with [
-  not empty? filter [ cor-base -> (shade-of? pcolor cor-base) and (pcolor != cor-base - 5) ] chaves-cores
-    ]
-    if any? patches-alvo [
-      if member? patch-here patches-alvo [
-      set pcolor pcolor - 1
+    let patches-alvo patches with [recurso > 0 and pcolor != brown]
+
+    ifelse recurso > 0 [
+      set pcolor pcolor - 0.5
+      set recurso recurso - 1
       set carga 1
-    ]
+      if (recurso = 0) [
+        set pcolor black
+      ]
+    ] [
+      ifelse any? patches-alvo [
       let patch-mais-perto min-one-of patches-alvo [distance myself]
       face patch-mais-perto
       movimento-exploracao
-    ]
+      ]
+      [
+        if pcolor != yellow [ 
+        set estado "voltar-base"
+        ]
+      ]
 
+    ]
 
   ] 
 
@@ -190,7 +211,7 @@ to movimento-exploradores
 
   if estado = "recurso-encontrado" and estado != "voltar-base" [
     if pcolor = brown [
-      set pcolor red
+      set pcolor cor-base
       set estado "explorar"
     ]
    movimento-exploracao
@@ -198,7 +219,7 @@ to movimento-exploradores
 
   if estado = "voltar-base"[
     if pcolor = yellow[
-      set energia energia + 300
+      set energia energia-exploradores
       set estado "explorar"
     ]
     movimento-voltar-base
