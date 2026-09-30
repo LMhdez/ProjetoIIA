@@ -1,14 +1,21 @@
+extensions [table]
+globals [mapa-cores]
+
 breed [coletores coletor] 
 breed [exploradores explorador]
 
+
 coletores-own [
+  velocidade
   energia
   fov
   estado
   dov
+  carga
 ]
 
 exploradores-own [
+  velocidade
   energia
   fov
   estado
@@ -17,6 +24,8 @@ exploradores-own [
 
 to setup
   clear-all
+
+  set mapa-cores table:from-list [[red 2] [blue 5] [pink 7]]
 
   ask patches [
     set pcolor green
@@ -29,6 +38,7 @@ to setup
 
   ask n-of 5 patches with [pcolor = green and distancexy 0 0 > 3 and pcolor != gray] [
       set pcolor brown
+      
   ]
   
   ask patches with [distancexy 0 0 < 3] [
@@ -42,8 +52,10 @@ to setup
     setxy -0.5 0
     set fov 180
     set dov 3
-    set energia 150
+    set energia 300
+    set velocidade 1
     set estado "explorar"
+
   ]
 
   create-coletores numero-coletores [
@@ -51,10 +63,12 @@ to setup
     set shape "truck"
     set size 1
     setxy 0 0.5
-    set energia 100
+    set energia 200
     set estado "explorar"
     set fov 45
     set dov 1
+    set velocidade 0.5
+    set carga 0
   ]
   
   reset-ticks
@@ -67,6 +81,14 @@ to go
 
   ask coletores [
     movimento-coletores
+  ]
+  ask turtles [ 
+    ifelse mostrar-energia [
+      set label round energia  
+      set label-color black    
+    ] [
+      set label ""             
+    ]
   ]
   
   tick
@@ -93,7 +115,7 @@ to evitar-obstaculos
       if dir-bloqueada? [ left one-of [45 90] ]
     ]
   ]
-end
+end 
 
 to scan-recursos
   let recursos-encontrados patches in-cone dov fov with [pcolor = brown]
@@ -106,41 +128,63 @@ end
 
 to movimento-exploracao
   evitar-obstaculos        
-  forward 1
+  forward velocidade
+   set energia (energia - 1)
 end
 
 to movimento-voltar-base
   facexy 0 0
   evitar-obstaculos
-  forward 1
+  forward velocidade
+   set energia (energia - 1)
 end
 
 to movimento-coletores
-  let energia-necessaria-voltar (distancexy 0 0) + 10
+  let energia-necessaria-voltar ((distancexy 0 0)*(1 / velocidade)) + 20
   
   if estado = "voltar-base"[
+
     if pcolor = yellow[
-      set energia energia + 100
+      set energia energia + 200
       set estado "explorar"
+      set carga 0
+      stop
     ]
     movimento-voltar-base
   ]
   
   if estado = "explorar"  [
-    if energia <= energia-necessaria-voltar [
+    
+    if energia <= energia-necessaria-voltar or carga != 0 [
       set estado "voltar-base"
+      stop
     ]
-    movimento-exploracao
+
+    let chaves-cores table:keys mapa-cores
+  let patches-alvo patches with [
+  not empty? filter [ cor-base -> (shade-of? pcolor cor-base) and (pcolor != cor-base - 5) ] chaves-cores
+    ]
+    if any? patches-alvo [
+      if member? patch-here patches-alvo [
+      set pcolor pcolor - 1
+      set carga 1
+    ]
+      let patch-mais-perto min-one-of patches-alvo [distance myself]
+      face patch-mais-perto
+      movimento-exploracao
+    ]
+
+
   ] 
 
-  set energia (energia - 1)
+ 
   if energia <= 0 [
     die
   ]
   end
 
 to movimento-exploradores
-  let energia-necessaria-voltar (distancexy 0 0) + 10
+  let energia-necessaria-voltar ((distancexy 0 0)*(1 / velocidade)) + 20
 
   scan-recursos
 
@@ -154,7 +198,7 @@ to movimento-exploradores
 
   if estado = "voltar-base"[
     if pcolor = yellow[
-      set energia energia + 100
+      set energia energia + 300
       set estado "explorar"
     ]
     movimento-voltar-base
@@ -167,7 +211,6 @@ to movimento-exploradores
     movimento-exploracao
   ]
 
-  set energia (energia - 1)
   if energia <= 0 [
     die
   ]
