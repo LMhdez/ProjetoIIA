@@ -1,5 +1,5 @@
 extensions [table]
-globals [mapa-cores]
+globals [mapa-cores recursos-coletados total-recursos]
 
 breed [coletores coletor] 
 breed [exploradores explorador]
@@ -49,6 +49,7 @@ to setup
     set pcolor brown
     set cor-base cor-aleatoria
     set recurso table:get mapa-cores cor-aleatoria
+    set total-recursos total-recursos + recurso
   ]
   
   ask patches with [distancexy 0 0 < 3] [
@@ -94,11 +95,7 @@ to go
   ask turtles [ 
     ifelse mostrar-energia [
       set label (word "E:" round energia " V:" velocidade) 
-      
-      ;; Branco (white) ou amarelo (yellow) têm o melhor contraste no teu mapa
       set label-color white
-
-
     ] [
       set label ""             
     ]
@@ -158,6 +155,7 @@ to movimento-coletores
   if estado = "voltar-base"[
 
     if pcolor = yellow and energia < energia-coletores [
+      set recursos-coletados recursos-coletados + carga
       set energia energia-coletores
       set estado "explorar"
       set carga 0
