@@ -1,9 +1,8 @@
 extensions [table]
 globals [mapa-cores recursos-coletados total-recursos]
 
-breed [coletores coletor] 
+breed [coletores coletor]  
 breed [exploradores explorador]
-
 
 coletores-own [
   velocidade
@@ -25,6 +24,8 @@ exploradores-own [
 patches-own [
   cor-base
   recurso
+  feromona
+  tempo-exposto
 ]
 
 to setup
@@ -35,7 +36,10 @@ to setup
   ask patches [
     set pcolor green
     set recurso 0
+    set feromona 0
+    set tempo-exposto 0
   ]
+  
   ask patches [
     if random 101 <= 5 [
       set pcolor gray
@@ -43,7 +47,6 @@ to setup
   ]
 
   ask n-of 5 patches with [pcolor = green and distancexy 0 0 > 3 and pcolor != gray] [
-
     let chaves-cores table:keys mapa-cores
     let cor-aleatoria one-of chaves-cores
     set pcolor brown
@@ -62,7 +65,7 @@ to setup
     set size 0.7
     setxy -0.5 0
     set fov 180
-    set dov 3
+    set dov 8
     set energia energia-exploradores
     set velocidade precision (0.6 + random-float 0.4) 3
     set estado "explorar"
@@ -72,11 +75,11 @@ to setup
     set color orange
     set shape "truck"
     set size 1
-    setxy 0 0.5
+    setxy 0 0.5 
     set energia energia-coletores
     set estado "explorar"
-    set fov 45
-    set dov 1
+    set fov 90
+    set dov 2
     set velocidade precision (0.2 + random-float 0.2) 3
     set carga 0
   ]
@@ -92,17 +95,28 @@ to go
   ask coletores [
     movimento-coletores
   ]
-  ask turtles [ 
+  
+  ask turtles [
     ifelse mostrar-energia [
-      set label (word "E:" round energia " V:" velocidade) 
+      set label (word "E:" round energia) 
       set label-color white
     ] [
-      set label ""             
+      ifelse mostrar-velocidade [
+        set label (word "V:" velocidade)
+        set label-color white
+      ] [
+        set label ""
+      ]
     ]
   ]
-  
+
+  atualizar-feromonas
+  atualizar-recursos
+
   tick
 end
+
+
 
 to evitar-obstaculos
   let proximo-patch patch-ahead 1
@@ -115,12 +129,10 @@ to evitar-obstaculos
 
   ifelse frente-bloqueada? and esq-bloqueada? and dir-bloqueada? [
     right 180
-  ]
-  [
+  ] [
     ifelse frente-bloqueada? [
       right one-of [90 -90]
-    ]
-    [
+    ] [
       if esq-bloqueada? [ right one-of [45 90] ]
       if dir-bloqueada? [ left one-of [45 90] ]
     ]
@@ -139,20 +151,24 @@ end
 to movimento-exploracao
   evitar-obstaculos        
   forward velocidade
-   set energia (energia - 1)
+  set energia (energia - 1)
 end
 
 to movimento-voltar-base
   facexy 0 0
   evitar-obstaculos
   forward velocidade
-   set energia (energia - 1)
+  set energia (energia - 1)
 end
 
 to movimento-coletores
-  let energia-necessaria-voltar ((distancexy 0 0)*(1 / velocidade)) + 20
+  let energia-necessaria-voltar ((distancexy 0 0) * (1 / velocidade)) + 20
   
-  if estado = "voltar-base"[
+  if estado = "voltar-base" [
+    ; Se o coletor estiver a carregar um recurso, pinta o caminho com 1/10 de violeta (+10)
+    if carga > 0 and pcolor != yellow and pcolor != gray and recurso = 0 [
+      set feromona min list 100 (feromona + 10)
+    ]
 
     if pcolor = yellow and energia < energia-coletores [
       set recursos-coletados recursos-coletados + carga
@@ -164,14 +180,16 @@ to movimento-coletores
     movimento-voltar-base
   ]
   
-  if estado = "explorar"  [
-    
+  if estado = "explorar" [
     if energia <= energia-necessaria-voltar or carga != 0 [
       set estado "voltar-base"
       stop
     ]
 
-    let patches-alvo patches with [recurso > 0 and pcolor != brown]
+    let recursos-visiveis patches in-cone dov fov with [recurso > 0 and pcolor != brown]
+    
+    ; Aumentamos a visão SÓ para cheirar (135 graus e um pouco mais longe) para não perderem as curvas a 90º!
+    let rastos-visiveis patches in-cone (dov + 1) 135 with [shade-of? pcolor violet]
 
     ifelse recurso > 0 [
       set pcolor pcolor - 0.5
@@ -181,49 +199,100 @@ to movimento-coletores
         set pcolor black
       ]
     ] [
-      ifelse any? patches-alvo [
-      let patch-mais-perto min-one-of patches-alvo [distance myself]
-      face patch-mais-perto
-      movimento-exploracao
-      ]
-      [
-        if pcolor != yellow [ 
-        set estado "voltar-base"
+      ; 1º Prioridade: Se vir o recurso, vai direto a ele
+      ifelse any? recursos-visiveis [
+        face min-one-of recursos-visiveis [distance myself]
+        movimento-exploracao
+      ] [
+        ; 2º Prioridade: Se vir feromona
+        ifelse any? rastos-visiveis [
+          ; EM VEZ de procurar o cheiro mais forte, eles miram o pedaço da estrada que está MAIS LONGE.
+          ; Isto obriga-os a conduzir "em frente" suavemente, compensando as velocidades aleatórias!
+          face max-one-of rastos-visiveis [distance myself]
+          movimento-exploracao
+        ] [
+          ; 3º Cenário: O cone de visão não vê nada. Será que escorregou para fora da estrada?
+          ; Vamos verificar num pequeno círculo à volta da carrinha para ver se a estrada está logo ali ao lado.
+          let rasto-perdido patches in-radius 2 with [shade-of? pcolor violet]
+          
+          ifelse any? rasto-perdido [
+            ; Sim, apenas escorregou! Vira-se para o rasto mais próximo para voltar a entrar.
+            face min-one-of rasto-perdido [distance myself]
+            movimento-exploracao
+          ] [
+            ; Não há rasto nenhum por perto. A estrada acabou mesmo ou evaporou toda.
+            ifelse pcolor != yellow [ 
+              set estado "voltar-base"
+            ] [
+              set estado "em-base"
+            ]
+          ]
         ]
       ]
-
     ]
+  ]
 
-  ] 
+  if estado = "em-base" [
+    let patches-alvo patches in-cone dov fov with [shade-of? pcolor violet]
+    ifelse any? patches-alvo [
+      let patch-mais-perto min-one-of patches-alvo [distance myself]
+      set estado "explorar"
+      face patch-mais-perto
+      movimento-exploracao
+    ] [
+      right random 360
+      if [pcolor] of patch-ahead 1 = yellow [
+        forward velocidade
+      ]
+    ]
+  ]
 
- 
   if energia <= 0 [
     die
   ]
-  end
+end
 
 to movimento-exploradores
-  let energia-necessaria-voltar ((distancexy 0 0)*(1 / velocidade)) + 20
+  let energia-necessaria-voltar ((distancexy 0 0) * (1 / velocidade)) + 20
 
   scan-recursos
 
-  if estado = "recurso-encontrado" and estado != "voltar-base" [
+  ; 1. Encontrou o recurso visualmente, vai até ele
+  if estado = "recurso-encontrado" [
     if pcolor = brown [
       set pcolor cor-base
-      set estado "explorar"
+      set estado "tracar-caminho" 
     ]
-   movimento-exploracao
+    if estado = "recurso-encontrado" [
+      movimento-exploracao
+    ]
   ]
 
-  if estado = "voltar-base"[
-    if pcolor = yellow[
+  ; 2. NOVO ESTADO: Volta para a base a pintar o caminho (APENAS o seu próprio patch)
+  if estado = "tracar-caminho" [
+    if pcolor != yellow and pcolor != gray and recurso = 0 [
+      ; O explorador pinta apenas o centro com 50% (sem o ask neighbors)
+      set feromona max list feromona 50 
+    ]
+    
+    if pcolor = yellow [
+      set energia energia-exploradores
+      set estado "explorar"
+    ]
+    if estado = "tracar-caminho" [
+      movimento-voltar-base
+    ]
+  ]
+
+  if estado = "voltar-base" [
+    if pcolor = yellow [
       set energia energia-exploradores
       set estado "explorar"
     ]
     movimento-voltar-base
   ]
 
-  if estado = "explorar"  [
+  if estado = "explorar" [
     if energia <= energia-necessaria-voltar [
       set estado "voltar-base"
     ]
@@ -232,5 +301,44 @@ to movimento-exploradores
 
   if energia <= 0 [
     die
+  ]
+end
+
+to atualizar-feromonas
+  ask patches with [feromona > 0] [
+    
+    ; Perde 1/300 avo do que está pintado a cada tick
+    set feromona feromona - (feromona / 150)
+    
+    
+    ; Se o valor ficar muito baixo, limpa a feromona para evitar lixo visual
+    if feromona < 1 [ 
+      set feromona 0 
+    ]
+    
+    ; Atualiza a cor (protegendo a base, os obstáculos e os recursos)
+    if pcolor = green or shade-of? pcolor violet [
+      ifelse feromona > 0 [
+        ; Usa scale-color (0 a 100) para mostrar as diferentes intensidades do violeta
+        set pcolor scale-color violet feromona 0 100
+      ] [
+        set pcolor green ; Volta a ser relva quando chega a zero
+      ]
+    ]
+  ]
+end
+
+to atualizar-recursos
+  ; Procura os recursos que já foram descobertos (não são castanhos, não são pretos e ainda têm minério)
+  ask patches with [recurso > 0 and pcolor != brown] [
+    
+    ; Aumenta o tempo que esteve exposto
+    set tempo-exposto tempo-exposto + 1
+    
+    ; Se atingir 400 ticks sem interrupções, esconde-se outra vez!
+    if tempo-exposto >= 400 [
+      set pcolor brown
+      set tempo-exposto 0
+    ]
   ]
 end
