@@ -3,7 +3,7 @@
   <code>__includes ["codigo.nls"]</code>
   <widgets>
     <view x="360" wrappingAllowedX="true" y="0" frameRate="30.0" minPycor="-32" height="449" showTickCounter="true" patchSize="6.85" fontSize="10" wrappingAllowedY="true" width="449" tickCounterLabel="ticks" maxPycor="32" updateMode="1" maxPxcor="32" minPxcor="-32"></view>
-    <chooser x="180" y="75" height="60" variable="numero-exploradores" current="2" width="150" display="numero-exploradores">
+    <chooser x="180" y="75" height="60" variable="numero-exploradores" current="5" width="150" display="numero-exploradores">
       <choice type="double" value="1.0"></choice>
       <choice type="double" value="2.0"></choice>
       <choice type="double" value="5.0"></choice>
@@ -14,7 +14,7 @@
     <button x="180" y="10" height="40" disableUntilTicks="false" forever="true" kind="Observer" width="150">go
 </button>
     <button x="15" y="10" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="150">setup</button>
-    <chooser x="15" y="75" height="60" variable="numero-coletores" current="2" width="150" display="numero-coletores">
+    <chooser x="15" y="75" height="60" variable="numero-coletores" current="3" width="150" display="numero-coletores">
       <choice type="double" value="1.0"></choice>
       <choice type="double" value="2.0"></choice>
       <choice type="double" value="5.0"></choice>
@@ -22,14 +22,15 @@
       <choice type="double" value="15.0"></choice>
       <choice type="double" value="50.0"></choice>
     </chooser>
-    <input x="15" multiline="false" y="150" height="60" variable="energia-coletores" type="number" width="150">415.0</input>
     <input x="180" multiline="false" y="150" height="60" variable="energia-exploradores" type="number" width="150">315.0</input>
-    <monitor x="180" precision="17" y="225" height="60" fontSize="11" width="150" display="nExploradores">count exploradores</monitor>
-    <monitor x="15" precision="17" y="225" height="60" fontSize="11" width="150" display="nColetores">count coletores</monitor>
-    <switch x="15" y="320" height="40" on="false" variable="mostrar-velocidade" width="95" display="mostrar-velocidade"></switch>
-    <switch x="125" y="320" height="40" on="false" variable="mostrar-energia" width="95" display="mostrar-energia"></switch>
-    <monitor x="15" precision="17" y="380" height="60" fontSize="11" width="100" display="Recursos totais">total-recursos</monitor>
-    <monitor x="135" precision="17" y="380" height="60" fontSize="11" width="100" display="Recursos encontrados">recursos-coletados</monitor>
+    <monitor x="180" precision="17" y="305" height="60" fontSize="11" width="150" display="nExploradores">count exploradores</monitor>
+    <monitor x="16" precision="17" y="305" height="60" fontSize="11" width="150" display="nColetores">count coletores</monitor>
+    <monitor x="15" precision="17" y="380" height="60" fontSize="11" width="150" display="Recursos totais">total-recursos</monitor>
+    <monitor x="180" precision="17" y="380" height="60" fontSize="11" width="150" display="Recursos encontrados">recursos-coletados</monitor>
+    <switch x="230" y="225" height="40" on="false" variable="mostrar-carga" width="95" display="mostrar-carga"></switch>
+    <switch x="123" y="225" height="40" on="true" variable="mostrar-energia" width="95" display="mostrar-energia"></switch>
+    <switch x="16" y="225" height="40" on="false" variable="mostrar-velocidade" width="95" display="mostrar-velocidade"></switch>
+    <input x="15" multiline="false" y="150" height="60" variable="energia-coletores" type="number" width="150">415.0</input>
   </widgets>
   <info>## WHAT IS IT?
 
