@@ -161,31 +161,28 @@ to go
   tick
 end
 
-to evitar-obstaculos
-  let proximo-patch patch-ahead 1
-  let patch-esq patch-left-and-ahead 45 1
-  let patch-dir patch-right-and-ahead 45 1
-
-  let frente-bloqueada? (proximo-patch = nobody or [pcolor] of proximo-patch = cor-obstaculo)
-  let esq-bloqueada? (patch-esq = nobody or [pcolor] of patch-esq = cor-obstaculo)
-  let dir-bloqueada? (patch-dir = nobody or [pcolor] of patch-dir = cor-obstaculo)
-
-  ifelse frente-bloqueada? and esq-bloqueada? and dir-bloqueada? [
-    right 180
-  ] [
-    ifelse frente-bloqueada? [
-      ;; Se ambos os lados estão livres, escolhe apenas um aleatoriamente
-      ifelse not dir-bloqueada? and not esq-bloqueada? [
-        right one-of [90 -90]
-      ] [
-        if not dir-bloqueada? [ right 90 ]
-        if not esq-bloqueada? [ left 90 ]
-      ]
-    ] [
-      if esq-bloqueada? [ right 45 ]
-      if dir-bloqueada? [ left 45 ]
-    ]
+to-report evitar-obstaculos
+  let orientacao-inicial heading
+  let caminho-livre? orientar-sem-obstaculos? 360 (one-of [1 -1])
+  if not caminho-livre? [
+    set heading orientacao-inicial
   ]
+  report caminho-livre?
+end
+
+to-report orientar-sem-obstaculos? [tentativas-restantes passo]
+  if tentativas-restantes <= 0 [ report false ]
+
+  let obstaculos-visiveis patches in-cone dov fov with [pcolor = cor-obstaculo]
+  let proximo-patch patch-ahead velocidade
+  let frente-bloqueada? (proximo-patch = nobody or [pcolor] of proximo-patch = cor-obstaculo)
+
+  if not any? obstaculos-visiveis and not frente-bloqueada? [
+    report true
+  ]
+
+  right passo
+  report orientar-sem-obstaculos? (tentativas-restantes - 1) passo
 end
 
 to scan-recursos
@@ -198,16 +195,18 @@ to scan-recursos
 end
 
 to movimento-exploracao
-  evitar-obstaculos        
-  forward velocidade
-  set energia (energia - 1)
+  if evitar-obstaculos [
+    forward velocidade
+    set energia (energia - 1)
+  ]
 end
 
 to movimento-voltar-base
   face centro-base
-  evitar-obstaculos
-  forward velocidade
-  set energia (energia - 1)
+  if evitar-obstaculos [
+    forward velocidade
+    set energia (energia - 1)
+  ]
 end
 
 to movimento-coletores
