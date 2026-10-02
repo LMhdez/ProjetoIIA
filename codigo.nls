@@ -83,12 +83,11 @@ to setup
       ]
     ]
   ] [
-    ;; Se não encontrou espaço, refaz o mapa!
     setup
     stop
   ]
 
-  ;; GERAÇÃO DOS RECURSOS (Longe da nova base)
+  ;; GERAÇÃO DOS RECURSOS
   ask n-of 5 patches with [pcolor = cor-vazio and distance centro-base > 5 and pcolor != cor-obstaculo] [
     let chaves-cores table:keys mapa-cores
     let cor-aleatoria one-of chaves-cores
@@ -135,7 +134,6 @@ to go
     movimento-coletores
   ]
   
-  ;; SISTEMA DE LABELS
   ask turtles [
     ifelse mostrar-energia [
       set label (word "E:" round energia) 
@@ -161,56 +159,75 @@ to go
   tick
 end
 
-to-report evitar-obstaculos
+;; --------------------------------------------------------
+;; NOVAS FUNÇÕES SEM "TO-REPORT"
+;; --------------------------------------------------------
+
+to tentar-avancar
+  let tentativas 36
+  let passo one-of [10 -10]
+  let moveu? false
   let orientacao-inicial heading
-  let caminho-livre? orientar-sem-obstaculos? 360 (one-of [1 -1])
-  if not caminho-livre? [
+
+  ; Usa um ciclo simples para procurar caminho em vez de recursividade
+  while [tentativas > 0 and not moveu?] [
+    let proximo-patch patch-ahead velocidade
+    let bloqueado? (any? patches in-cone 1.5 90 with [pcolor = cor-obstaculo]) or (proximo-patch = nobody)
+    
+    ifelse not bloqueado? [
+      forward velocidade
+      set energia (energia - 1)
+      set moveu? true
+    ] [
+      right passo
+      set tentativas tentativas - 1
+    ]
+  ]
+
+  ; Se não encontrou caminho absolutamente nenhum, volta à direção original para não ficar a rodopiar
+  if not moveu? [
     set heading orientacao-inicial
   ]
-  report caminho-livre?
 end
 
-to-report orientar-sem-obstaculos? [tentativas-restantes passo]
-  if tentativas-restantes <= 0 [ report false ]
-
-  let obstaculos-visiveis patches in-cone dov fov with [pcolor = cor-obstaculo]
+to virar-para-alvo-seguro [alvo]
+  let direcao-antiga heading
+  face alvo
+  
   let proximo-patch patch-ahead velocidade
-  let frente-bloqueada? (proximo-patch = nobody or [pcolor] of proximo-patch = cor-obstaculo)
-
-  if not any? obstaculos-visiveis and not frente-bloqueada? [
-    report true
+  let bloqueado? (any? patches in-cone 1.5 90 with [pcolor = cor-obstaculo]) or (proximo-patch = nobody)
+  
+  ; Se ao virar-se para o alvo vir uma parede, ignora o alvo e mantém-se a contornar a parede!
+  if bloqueado? [
+    set heading direcao-antiga
   ]
-
-  right passo
-  report orientar-sem-obstaculos? (tentativas-restantes - 1) passo
 end
+
+;; --------------------------------------------------------
+;; LÓGICA DE MOVIMENTO ATUALIZADA
+;; --------------------------------------------------------
 
 to scan-recursos
   let recursos-encontrados patches in-cone dov fov with [pcolor = cor-recurso]
   if any? recursos-encontrados [
     set estado "recurso-encontrado"
     let recurso-mais-proximo min-one-of recursos-encontrados [distance myself]
-    face recurso-mais-proximo
+    
+    virar-para-alvo-seguro recurso-mais-proximo
   ]
 end
 
 to movimento-exploracao
-  if evitar-obstaculos [
-    forward velocidade
-    set energia (energia - 1)
-  ]
+  tentar-avancar
 end
 
 to movimento-voltar-base
-  face centro-base
-  if evitar-obstaculos [
-    forward velocidade
-    set energia (energia - 1)
-  ]
+  virar-para-alvo-seguro centro-base
+  tentar-avancar
 end
 
 to movimento-coletores
-  let energia-necessaria-voltar ((distance centro-base) * (1 / velocidade)) + 20
+  let energia-necessaria-voltar ((distance centro-base) * (1.5 / velocidade)) + 50
   
   if estado = "voltar-base" [
     if carga > 0 and pcolor != cor-base and pcolor != cor-obstaculo and recurso = 0 [
@@ -245,16 +262,16 @@ to movimento-coletores
       ]
     ] [
       ifelse any? recursos-visiveis [
-        face min-one-of recursos-visiveis [distance myself]
+        virar-para-alvo-seguro min-one-of recursos-visiveis [distance myself]
         movimento-exploracao
       ] [
         ifelse any? rastos-visiveis [
-          face max-one-of rastos-visiveis [distance myself]
+          virar-para-alvo-seguro max-one-of rastos-visiveis [distance myself]
           movimento-exploracao
         ] [
           let rasto-perdido patches in-radius 2 with [feromona > 0]
           ifelse any? rasto-perdido [
-            face min-one-of rasto-perdido [distance myself]
+            virar-para-alvo-seguro min-one-of rasto-perdido [distance myself]
             movimento-exploracao
           ] [
             ifelse pcolor != cor-base [ 
@@ -289,7 +306,7 @@ to movimento-coletores
 end
 
 to movimento-exploradores
-  let energia-necessaria-voltar ((distance centro-base) * (1 / velocidade)) + 80
+  let energia-necessaria-voltar ((distance centro-base) * (1.5 / velocidade)) + 50
 
   scan-recursos
 
@@ -329,6 +346,7 @@ to movimento-exploradores
     if energia <= energia-necessaria-voltar [
       set estado "voltar-base"
     ]
+    right (random-float 20 - 10)
     movimento-exploracao
   ]
 
