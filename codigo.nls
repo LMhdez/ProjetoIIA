@@ -68,7 +68,6 @@ to setup
     ]
   ]
 
-  ;; GERAÇÃO DINÂMICA DA BASE (Procura um local seguro)
   let locais-seguros patches with [
     pxcor > min-pxcor + 5 and pxcor < max-pxcor - 5 and 
     pycor > min-pycor + 5 and pycor < max-pycor - 5 and
@@ -87,15 +86,48 @@ to setup
     stop
   ]
 
-  ;; GERAÇÃO DOS RECURSOS
-  ask n-of 5 patches with [pcolor = cor-vazio and distance centro-base > 5 and pcolor != cor-obstaculo] [
-    let chaves-cores table:keys mapa-cores
-    let cor-aleatoria one-of chaves-cores
-    set pcolor cor-recurso
-    set cor-inicial cor-aleatoria
-    set recurso table:get mapa-cores cor-aleatoria
-    set total-recursos total-recursos + recurso
-  ]
+let chaves-cores table:keys mapa-cores 
+  let numero-zonas-recursos random 5 + 1
+  
+  ; Se não usares um slider na interface, descomenta a linha abaixo para definir o valor no código:
+  ; let max-patches-recurso 30 
+  
+  ifelse distribuicao-agregada [
+    ; --- MODO AGREGADO (Recursos concentrados) ---
+    ; 1. Escolhe os centros das zonas de recursos
+    let zonas-centrais n-of numero-zonas-recursos patches with [pcolor = cor-vazio and distance centro-base > 5 and pcolor != cor-obstaculo]
+    
+    ; 2. Encontra todos os patches vazios num raio de 2 à volta dessas zonas centrais
+    let patches-agregados patches with [pcolor = cor-vazio and pcolor != cor-obstaculo and any? zonas-centrais in-radius 2]
+    
+    ; 3. Garante que o NetLogo não dá erro se houver menos patches disponíveis do que o máximo pedido
+    let quantidade-a-criar min list max-patches-recurso (count patches-agregados)
+    
+    ; 4. Transforma exatamente esse número de patches em recursos
+    ask n-of quantidade-a-criar patches-agregados [
+      let cor-aleatoria one-of chaves-cores
+      set pcolor cor-recurso
+      set cor-inicial cor-aleatoria
+      set recurso table:get mapa-cores cor-aleatoria
+      set total-recursos total-recursos + recurso
+    ]
+  ] [
+    ; --- MODO ALEATÓRIO (Recursos dispersos individualmente) ---
+    ; 1. Encontra todos os patches válidos e espalhados pelo mapa
+    let patches-validos patches with [pcolor = cor-vazio and distance centro-base > 5 and pcolor != cor-obstaculo]
+    
+    ; 2. Limita à quantidade máxima definida
+    let quantidade-a-criar min list max-patches-recurso (count patches-validos)
+    
+    ; 3. Transforma aleatoriamente esses patches em recursos
+    ask n-of quantidade-a-criar patches-validos [
+      let cor-aleatoria one-of chaves-cores
+      set pcolor cor-recurso
+      set cor-inicial cor-aleatoria
+      set recurso table:get mapa-cores cor-aleatoria
+      set total-recursos total-recursos + recurso
+    ]
+  ]  
   
   create-exploradores numero-exploradores [
     set color cor-exploradores
@@ -126,6 +158,9 @@ to setup
 end
 
 to go 
+
+if ticks >= limite-ticks [ stop ]
+
   ask exploradores [
     movimento-exploradores
   ]
@@ -159,17 +194,12 @@ to go
   tick
 end
 
-;; --------------------------------------------------------
-;; NOVAS FUNÇÕES SEM "TO-REPORT"
-;; --------------------------------------------------------
-
 to tentar-avancar
   let tentativas 36
   let passo one-of [10 -10]
   let moveu? false
   let orientacao-inicial heading
 
-  ; Usa um ciclo simples para procurar caminho em vez de recursividade
   while [tentativas > 0 and not moveu?] [
     let proximo-patch patch-ahead velocidade
     let bloqueado? (any? patches in-cone 1.5 90 with [pcolor = cor-obstaculo]) or (proximo-patch = nobody)
@@ -184,7 +214,6 @@ to tentar-avancar
     ]
   ]
 
-  ; Se não encontrou caminho absolutamente nenhum, volta à direção original para não ficar a rodopiar
   if not moveu? [
     set heading orientacao-inicial
   ]
@@ -197,15 +226,10 @@ to virar-para-alvo-seguro [alvo]
   let proximo-patch patch-ahead velocidade
   let bloqueado? (any? patches in-cone 1.5 90 with [pcolor = cor-obstaculo]) or (proximo-patch = nobody)
   
-  ; Se ao virar-se para o alvo vir uma parede, ignora o alvo e mantém-se a contornar a parede!
   if bloqueado? [
     set heading direcao-antiga
   ]
 end
-
-;; --------------------------------------------------------
-;; LÓGICA DE MOVIMENTO ATUALIZADA
-;; --------------------------------------------------------
 
 to scan-recursos
   let recursos-encontrados patches in-cone dov fov with [pcolor = cor-recurso]
@@ -231,7 +255,10 @@ to movimento-coletores
   
   if estado = "voltar-base" [
     if carga > 0 and pcolor != cor-base and pcolor != cor-obstaculo and recurso = 0 [
-      set feromona min list 100 (feromona + 10)
+      if usar-comunicacao [
+   set feromona min list 100 (feromona + 10)
+]
+     
     ]
 
     if pcolor = cor-base and energia < energia-coletores [
@@ -322,7 +349,9 @@ to movimento-exploradores
 
   if estado = "tracar-caminho" [
     if pcolor != cor-base and pcolor != cor-obstaculo and recurso = 0 [
-      set feromona max list feromona 50 
+      if usar-comunicacao [
+  set feromona max list feromona 50
+]
     ]
     
     if pcolor = cor-base [

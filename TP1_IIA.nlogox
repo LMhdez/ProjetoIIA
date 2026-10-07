@@ -2,35 +2,39 @@
 <model version="NetLogo 7.0.4" snapToGrid="true">
   <code>__includes ["codigo.nls"]</code>
   <widgets>
-    <view x="360" wrappingAllowedX="true" y="0" frameRate="30.0" minPycor="-32" height="449" showTickCounter="true" patchSize="6.85" fontSize="10" wrappingAllowedY="true" width="449" tickCounterLabel="ticks" maxPycor="32" updateMode="1" maxPxcor="32" minPxcor="-32"></view>
-    <chooser x="180" y="75" height="60" variable="numero-exploradores" current="5" width="150" display="numero-exploradores">
-      <choice type="double" value="1.0"></choice>
-      <choice type="double" value="2.0"></choice>
-      <choice type="double" value="5.0"></choice>
-      <choice type="double" value="10.0"></choice>
-      <choice type="double" value="15.0"></choice>
-      <choice type="double" value="50.0"></choice>
-    </chooser>
-    <button x="180" y="10" height="40" disableUntilTicks="false" forever="true" kind="Observer" width="150">go
+    <view x="520" wrappingAllowedX="true" y="0" frameRate="30.0" minPycor="-32" height="474" showTickCounter="true" patchSize="7.231" fontSize="10" wrappingAllowedY="true" width="474" tickCounterLabel="ticks" maxPycor="32" updateMode="1" maxPxcor="32" minPxcor="-32"></view>
+    <button x="180" y="10" height="40" disableUntilTicks="false" forever="true" kind="Observer" width="150" display="Go">go
 </button>
-    <button x="15" y="10" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="150">setup</button>
-    <chooser x="15" y="75" height="60" variable="numero-coletores" current="3" width="150" display="numero-coletores">
-      <choice type="double" value="1.0"></choice>
-      <choice type="double" value="2.0"></choice>
-      <choice type="double" value="5.0"></choice>
-      <choice type="double" value="10.0"></choice>
-      <choice type="double" value="15.0"></choice>
-      <choice type="double" value="50.0"></choice>
-    </chooser>
-    <input x="180" multiline="false" y="150" height="60" variable="energia-exploradores" type="number" width="150">315.0</input>
-    <monitor x="180" precision="17" y="305" height="60" fontSize="11" width="150" display="nExploradores">count exploradores</monitor>
-    <monitor x="16" precision="17" y="305" height="60" fontSize="11" width="150" display="nColetores">count coletores</monitor>
-    <monitor x="15" precision="17" y="380" height="60" fontSize="11" width="150" display="Recursos totais">total-recursos</monitor>
-    <monitor x="180" precision="17" y="380" height="60" fontSize="11" width="150" display="Recursos encontrados">recursos-coletados</monitor>
-    <switch x="230" y="225" height="40" on="false" variable="mostrar-carga" width="95" display="mostrar-carga"></switch>
-    <switch x="123" y="225" height="40" on="true" variable="mostrar-energia" width="95" display="mostrar-energia"></switch>
+    <input x="180" multiline="false" y="150" height="60" variable="energia-exploradores" type="number" width="150">350.0</input>
+    <switch x="123" y="225" height="40" on="false" variable="mostrar-energia" width="95" display="mostrar-energia"></switch>
     <switch x="16" y="225" height="40" on="false" variable="mostrar-velocidade" width="95" display="mostrar-velocidade"></switch>
     <input x="15" multiline="false" y="150" height="60" variable="energia-coletores" type="number" width="150">415.0</input>
+    <switch x="15" y="275" height="40" on="false" variable="distribuicao-agregada" width="95" display="distribuicao-agregada"></switch>
+    <monitor x="15" precision="17" y="330" height="60" fontSize="11" width="150" display="Coletores">count coletores</monitor>
+    <monitor x="179" precision="17" y="405" height="60" fontSize="11" width="150" display="Recursos encontrados">recursos-coletados</monitor>
+    <monitor x="14" precision="17" y="405" height="60" fontSize="11" width="150" display="Recursos totais">total-recursos</monitor>
+    <input x="345" multiline="false" y="150" height="60" variable="max-patches-recurso" type="number" width="155">10.0</input>
+    <button x="15" y="10" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="150" display="Setup">setup</button>
+    <note x="15" y="225" backgroundDark="-14664853" fontSize="12" width="75" markdown="false" height="41" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">Mostrar
+Velocidade</note>
+    <note x="231" y="225" backgroundDark="-14664853" fontSize="12" width="75" markdown="false" height="41" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">Mostrar
+Carga col.
+</note>
+    <note x="15" y="275" backgroundDark="-14664853" fontSize="12" width="75" markdown="false" height="41" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">Ñ Distr. 
+Recursos
+</note>
+    <input x="345" multiline="false" y="225" height="60" variable="limite-ticks" type="number" width="155">10000.0</input>
+    <switch x="230" y="225" height="40" on="false" variable="mostrar-carga" width="100" display="mostrar-carga"></switch>
+    <monitor x="179" precision="17" y="330" height="60" fontSize="11" width="150" display="Exploradores">count exploradores</monitor>
+    <switch x="125" y="275" height="40" on="true" variable="usar-comunicacao" width="131" display="usar-comunicacao"></switch>
+    <note x="125" y="225" backgroundDark="-14664853" fontSize="12" width="75" markdown="false" height="41" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">Mostrar
+Energia</note>
+    <note x="230" y="225" backgroundDark="-14664853" fontSize="12" width="75" markdown="false" height="41" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">Mostrar
+Carga</note>
+    <note x="125" y="275" backgroundDark="-14664853" fontSize="12" width="75" markdown="false" height="41" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">Usar
+Feromona</note>
+    <input x="15" multiline="false" y="75" height="60" variable="numero-coletores" type="number" width="230">10.0</input>
+    <input x="270" multiline="false" y="75" height="60" variable="numero-exploradores" type="number" width="230">50.0</input>
   </widgets>
   <info>## WHAT IS IT?
 
@@ -902,4 +906,59 @@
     </shape>
   </linkShapes>
   <previewCommands>setup repeat 75 [ go ]</previewCommands>
+  <experiments>
+    <experiment name="experiment" repetitions="10" sequentialRunOrder="true" runMetricsEveryStep="true">
+      <setup>setup</setup>
+      <go>go</go>
+      <metrics>
+        <metric>recursos-coletados</metric>
+        <metric>count exploradores</metric>
+        <metric>count coletores</metric>
+        <metric>ticks</metric>
+      </metrics>
+      <constants>
+        <enumeratedValueSet variable="mostrar-carga">
+          <value value="false"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="mostrar-velocidade">
+          <value value="false"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="mostrar-energia">
+          <value value="false"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="max-patches-recurso">
+          <value value="10"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="distribuicao-agregada">
+          <value value="false"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="energia-coletores">
+          <value value="415"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="energia-exploradores">
+          <value value="350"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="usar-comunicacao">
+          <value value="true"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="numero-exploradores">
+          <value value="10"></value>
+          <value value="20"></value>
+          <value value="25"></value>
+          <value value="30"></value>
+          <value value="40"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="numero-coletores">
+          <value value="10"></value>
+          <value value="20"></value>
+          <value value="25"></value>
+          <value value="30"></value>
+          <value value="40"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="limite-ticks">
+          <value value="10000"></value>
+        </enumeratedValueSet>
+      </constants>
+    </experiment>
+  </experiments>
 </model>
