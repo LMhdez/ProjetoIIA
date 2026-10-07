@@ -6,7 +6,6 @@
     <button x="180" y="10" height="40" disableUntilTicks="false" forever="true" kind="Observer" width="150" display="Go">go
 </button>
     <input x="180" multiline="false" y="150" height="60" variable="energia-exploradores" type="number" width="150">350.0</input>
-    <switch x="123" y="225" height="40" on="false" variable="mostrar-energia" width="95" display="mostrar-energia"></switch>
     <switch x="16" y="225" height="40" on="false" variable="mostrar-velocidade" width="95" display="mostrar-velocidade"></switch>
     <input x="15" multiline="false" y="150" height="60" variable="energia-coletores" type="number" width="150">415.0</input>
     <switch x="15" y="275" height="40" on="false" variable="distribuicao-agregada" width="95" display="distribuicao-agregada"></switch>
@@ -26,15 +25,17 @@ Recursos
     <input x="345" multiline="false" y="225" height="60" variable="limite-ticks" type="number" width="155">10000.0</input>
     <switch x="230" y="225" height="40" on="false" variable="mostrar-carga" width="100" display="mostrar-carga"></switch>
     <monitor x="179" precision="17" y="330" height="60" fontSize="11" width="150" display="Exploradores">count exploradores</monitor>
-    <switch x="125" y="275" height="40" on="true" variable="usar-comunicacao" width="131" display="usar-comunicacao"></switch>
-    <note x="125" y="225" backgroundDark="-14664853" fontSize="12" width="75" markdown="false" height="41" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">Mostrar
-Energia</note>
     <note x="230" y="225" backgroundDark="-14664853" fontSize="12" width="75" markdown="false" height="41" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">Mostrar
 Carga</note>
-    <note x="125" y="275" backgroundDark="-14664853" fontSize="12" width="75" markdown="false" height="41" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">Usar
-Feromona</note>
     <input x="15" multiline="false" y="75" height="60" variable="numero-coletores" type="number" width="230">10.0</input>
     <input x="270" multiline="false" y="75" height="60" variable="numero-exploradores" type="number" width="230">50.0</input>
+    <input x="345" multiline="false" y="5" height="60" variable="semente" type="number" width="145">67.0</input>
+    <switch x="125" y="275" height="40" on="true" variable="usar-comunicacao" width="95" display="usar-comunicacao"></switch>
+    <note x="125" y="275" backgroundDark="-14664853" fontSize="12" width="75" markdown="false" height="41" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">Usar
+Feromona</note>
+    <switch x="123" y="225" height="40" on="true" variable="mostrar-energia" width="95" display="mostrar-energia"></switch>
+    <note x="125" y="225" backgroundDark="-14664853" fontSize="12" width="75" markdown="false" height="41" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">Mostrar
+Energia</note>
   </widgets>
   <info>## WHAT IS IT?
 

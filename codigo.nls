@@ -42,6 +42,10 @@ patches-own [
 
 to setup
   clear-all
+  
+  if semente != 0[
+  random-seed semente
+  ]
 
   set recursos-coletados 0
   set total-recursos 0
@@ -335,6 +339,12 @@ end
 to movimento-exploradores
   let energia-necessaria-voltar ((distance centro-base) * (1.5 / velocidade)) + 50
 
+  if estado != "voltar-base" and estado != "tracar-caminho" [
+    if energia <= energia-necessaria-voltar [
+        set estado "voltar-base"
+      ]
+  ]
+
   scan-recursos
 
   if estado = "recurso-encontrado" [
@@ -342,6 +352,11 @@ to movimento-exploradores
       set pcolor cor-inicial
       set estado "tracar-caminho" 
     ]
+
+    if estado = "recurso-encontrado" and not any? patches in-cone dov fov with [pcolor = cor-recurso] [
+      set estado "explorar"
+    ]
+
     if estado = "recurso-encontrado" [
       movimento-exploracao
     ]
@@ -372,9 +387,7 @@ to movimento-exploradores
   ]
 
   if estado = "explorar" [
-    if energia <= energia-necessaria-voltar [
-      set estado "voltar-base"
-    ]
+    
     right (random-float 20 - 10)
     movimento-exploracao
   ]
