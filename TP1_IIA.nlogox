@@ -962,6 +962,9 @@ Centrada</note>
         <enumeratedValueSet variable="semente">
           <value value="0"></value>
         </enumeratedValueSet>
+        <enumeratedValueSet variable="sao-organizados">
+          <value value="false"></value>
+        </enumeratedValueSet>
       </constants>
     </experiment>
     <experiment name="Experiencia1" repetitions="10" sequentialRunOrder="true" runMetricsEveryStep="false">
@@ -1022,6 +1025,9 @@ Centrada</note>
         </enumeratedValueSet>
         <enumeratedValueSet variable="usar-comunicacao">
           <value value="true"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="base-centrada">
+          <value value="false"></value>
         </enumeratedValueSet>
       </constants>
     </experiment>
@@ -1178,6 +1184,126 @@ Centrada</note>
         </enumeratedValueSet>
         <enumeratedValueSet variable="usar-comunicacao">
           <value value="true"></value>
+        </enumeratedValueSet>
+      </constants>
+    </experiment>
+    <experiment name="Experiencia4" repetitions="10" sequentialRunOrder="true" runMetricsEveryStep="false">
+      <setup>setup</setup>
+      <go>go</go>
+      <metrics>
+        <metric>recursos-coletados</metric>
+        <metric>total-recursos</metric>
+        <metric>count exploradores</metric>
+        <metric>count coletores</metric>
+        <metric>ticks</metric>
+      </metrics>
+      <constants>
+        <enumeratedValueSet variable="semente">
+          <value value="0"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="mostrar-velocidade">
+          <value value="false"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="limite-ticks">
+          <value value="10000"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="energia-coletores">
+          <value value="415"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="energia-exploradores">
+          <value value="350"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="mostrar-energia">
+          <value value="false"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="mostrar-carga">
+          <value value="false"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="max-patches-recurso">
+          <value value="10"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="numero-exploradores">
+          <value value="10"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="numero-coletores">
+          <value value="40"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="distribuicao-agregada">
+          <value value="true"></value>
+          <value value="false"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="usar-comunicacao">
+          <value value="true"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="sao-organizados">
+          <value value="true"></value>
+          <value value="false"></value>
+        </enumeratedValueSet>
+      </constants>
+    </experiment>
+    <experiment name="Experiencia5" repetitions="10" sequentialRunOrder="true" runMetricsEveryStep="false">
+      <setup>setup</setup>
+      <go>go</go>
+      <metrics>
+        <metric>recursos-coletados</metric>
+        <metric>total-recursos</metric>
+        <metric>count exploradores</metric>
+        <metric>count coletores</metric>
+        <metric>ticks</metric>
+      </metrics>
+      <constants>
+        <enumeratedValueSet variable="semente">
+          <value value="0"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="mostrar-velocidade">
+          <value value="false"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="limite-ticks">
+          <value value="10000"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="energia-coletores">
+          <value value="415"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="energia-exploradores">
+          <value value="350"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="sao-organizados">
+          <value value="false"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="mostrar-energia">
+          <value value="false"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="mostrar-carga">
+          <value value="false"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="max-patches-recurso">
+          <value value="10"></value>
+          <value value="20"></value>
+          <value value="30"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="numero-exploradores">
+          <value value="10"></value>
+          <value value="20"></value>
+          <value value="25"></value>
+          <value value="30"></value>
+          <value value="40"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="numero-coletores">
+          <value value="10"></value>
+          <value value="20"></value>
+          <value value="25"></value>
+          <value value="30"></value>
+          <value value="40"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="distribuicao-agregada">
+          <value value="true"></value>
+          <value value="false"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="usar-comunicacao">
+          <value value="true"></value>
+        </enumeratedValueSet>
+        <enumeratedValueSet variable="base-centrada">
+          <value value="false"></value>
         </enumeratedValueSet>
       </constants>
     </experiment>
