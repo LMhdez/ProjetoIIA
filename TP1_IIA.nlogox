@@ -23,19 +23,22 @@ Carga col.
 Recursos
 </note>
     <input x="345" multiline="false" y="225" height="60" variable="limite-ticks" type="number" width="155">10000.0</input>
-    <switch x="230" y="225" height="40" on="false" variable="mostrar-carga" width="100" display="mostrar-carga"></switch>
     <monitor x="179" precision="17" y="330" height="60" fontSize="11" width="150" display="Exploradores">count exploradores</monitor>
-    <note x="230" y="225" backgroundDark="-14664853" fontSize="12" width="75" markdown="false" height="41" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">Mostrar
-Carga</note>
     <input x="15" multiline="false" y="75" height="60" variable="numero-coletores" type="number" width="230">10.0</input>
     <input x="270" multiline="false" y="75" height="60" variable="numero-exploradores" type="number" width="230">50.0</input>
     <input x="345" multiline="false" y="5" height="60" variable="semente" type="number" width="145">67.0</input>
     <switch x="125" y="275" height="40" on="true" variable="usar-comunicacao" width="95" display="usar-comunicacao"></switch>
-    <note x="125" y="275" backgroundDark="-14664853" fontSize="12" width="75" markdown="false" height="41" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">Usar
-Feromona</note>
-    <switch x="123" y="225" height="40" on="true" variable="mostrar-energia" width="95" display="mostrar-energia"></switch>
+    <switch x="123" y="225" height="40" on="false" variable="mostrar-energia" width="95" display="mostrar-energia"></switch>
     <note x="125" y="225" backgroundDark="-14664853" fontSize="12" width="75" markdown="false" height="41" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">Mostrar
 Energia</note>
+    <switch x="230" y="225" height="40" on="false" variable="mostrar-carga" width="100" display="mostrar-carga"></switch>
+    <note x="125" y="275" backgroundDark="-14664853" fontSize="12" width="75" markdown="false" height="41" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">Usar
+Feromona</note>
+    <note x="230" y="225" backgroundDark="-14664853" fontSize="12" width="75" markdown="false" height="41" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">Mostrar
+Carga</note>
+    <switch x="230" y="275" height="40" on="false" variable="sao-organizados" width="100" display="sao-organizados"></switch>
+    <note x="230" y="275" backgroundDark="-14664853" fontSize="12" width="80" markdown="false" height="40" textColorDark="-1" textColorLight="-16777216" backgroundLight="-13345367">São
+organizados?</note>
   </widgets>
   <info>## WHAT IS IT?
 

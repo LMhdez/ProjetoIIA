@@ -1,4 +1,5 @@
 extensions [table]
+
 globals [
   mapa-cores 
   recursos-coletados 
@@ -43,8 +44,8 @@ patches-own [
 to setup
   clear-all
   
-  if semente != 0[
-  random-seed semente
+  if semente != 0 [
+    random-seed semente
   ]
 
   set recursos-coletados 0
@@ -90,24 +91,14 @@ to setup
     stop
   ]
 
-let chaves-cores table:keys mapa-cores 
+  let chaves-cores table:keys mapa-cores 
   let numero-zonas-recursos random 5 + 1
   
-  ; Se não usares um slider na interface, descomenta a linha abaixo para definir o valor no código:
-  ; let max-patches-recurso 30 
-  
   ifelse distribuicao-agregada [
-    ; --- MODO AGREGADO (Recursos concentrados) ---
-    ; 1. Escolhe os centros das zonas de recursos
     let zonas-centrais n-of numero-zonas-recursos patches with [pcolor = cor-vazio and distance centro-base > 5 and pcolor != cor-obstaculo]
-    
-    ; 2. Encontra todos os patches vazios num raio de 2 à volta dessas zonas centrais
     let patches-agregados patches with [pcolor = cor-vazio and pcolor != cor-obstaculo and any? zonas-centrais in-radius 2]
-    
-    ; 3. Garante que o NetLogo não dá erro se houver menos patches disponíveis do que o máximo pedido
     let quantidade-a-criar min list max-patches-recurso (count patches-agregados)
     
-    ; 4. Transforma exatamente esse número de patches em recursos
     ask n-of quantidade-a-criar patches-agregados [
       let cor-aleatoria one-of chaves-cores
       set pcolor cor-recurso
@@ -116,14 +107,9 @@ let chaves-cores table:keys mapa-cores
       set total-recursos total-recursos + recurso
     ]
   ] [
-    ; --- MODO ALEATÓRIO (Recursos dispersos individualmente) ---
-    ; 1. Encontra todos os patches válidos e espalhados pelo mapa
     let patches-validos patches with [pcolor = cor-vazio and distance centro-base > 5 and pcolor != cor-obstaculo]
-    
-    ; 2. Limita à quantidade máxima definida
     let quantidade-a-criar min list max-patches-recurso (count patches-validos)
     
-    ; 3. Transforma aleatoriamente esses patches em recursos
     ask n-of quantidade-a-criar patches-validos [
       let cor-aleatoria one-of chaves-cores
       set pcolor cor-recurso
@@ -162,8 +148,11 @@ let chaves-cores table:keys mapa-cores
 end
 
 to go 
+  if ticks >= limite-ticks [ stop ]
 
-if ticks >= limite-ticks [ stop ]
+  if sum [recurso] of patches = 0 and sum [carga] of coletores = 0 [ 
+    stop 
+  ]
 
   ask exploradores [
     movimento-exploradores
@@ -260,9 +249,8 @@ to movimento-coletores
   if estado = "voltar-base" [
     if carga > 0 and pcolor != cor-base and pcolor != cor-obstaculo and recurso = 0 [
       if usar-comunicacao [
-   set feromona min list 100 (feromona + 10)
-]
-     
+        set feromona min list 100 (feromona + 10)
+      ]
     ]
 
     if pcolor = cor-base and energia < energia-coletores [
@@ -305,10 +293,15 @@ to movimento-coletores
             virar-para-alvo-seguro min-one-of rasto-perdido [distance myself]
             movimento-exploracao
           ] [
-            ifelse pcolor != cor-base [ 
-              set estado "voltar-base"
+            ifelse sao-organizados [
+              ifelse pcolor != cor-base [ 
+                set estado "voltar-base"
+              ] [
+                set estado "em-base"
+              ]
             ] [
-              set estado "em-base"
+              right (random-float 40 - 20)
+              movimento-exploracao
             ]
           ]
         ]
@@ -341,8 +334,8 @@ to movimento-exploradores
 
   if estado != "voltar-base" and estado != "tracar-caminho" [
     if energia <= energia-necessaria-voltar [
-        set estado "voltar-base"
-      ]
+      set estado "voltar-base"
+    ]
   ]
 
   scan-recursos
@@ -365,8 +358,8 @@ to movimento-exploradores
   if estado = "tracar-caminho" [
     if pcolor != cor-base and pcolor != cor-obstaculo and recurso = 0 [
       if usar-comunicacao [
-  set feromona max list feromona 50
-]
+        set feromona max list feromona 50
+      ]
     ]
     
     if pcolor = cor-base [
@@ -387,7 +380,6 @@ to movimento-exploradores
   ]
 
   if estado = "explorar" [
-    
     right (random-float 20 - 10)
     movimento-exploracao
   ]
